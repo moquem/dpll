@@ -27,7 +27,7 @@ struct
       (
         let cnf1 = remove_lvar_clause l_sgl p.cnf in
         let cnf3 = Cnf.filter (fun elt -> not(Clause.is_empty elt)) cnf1 in
-        if Cnf.cardinal cnf1 <> Cnf.cardinal cnf3 then (memoisation := Memois.add cnf3 !memoisation; None)
+        if Cnf.cardinal cnf1 <> Cnf.cardinal cnf3 then (memoisation := Memois.add cnf1 !memoisation; None)
         else
         match Cnf.choose_opt cnf3 with
           | None -> Some []

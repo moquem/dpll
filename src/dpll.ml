@@ -22,12 +22,12 @@ struct
     else 
     ( 
       let l_sgl = List.map (fun elt -> Clause.choose elt) (Cnf.elements (Cnf.filter (fun elt -> (Clause.cardinal elt) = 1) p.cnf)) in 
-      if not(verif_unit_prop l_sgl) then None
+      if not(verif_unit_prop l_sgl) then (memoisation := Memois.add p.cnf !memoisation; None)
       else 
       (
         let cnf1 = remove_lvar_clause l_sgl p.cnf in
         let cnf3 = Cnf.filter (fun elt -> not(Clause.is_empty elt)) cnf1 in
-        if Cnf.cardinal cnf1 <> Cnf.cardinal cnf3 then (memoisation := Memois.add cnf1 !memoisation; None)
+        if Cnf.cardinal cnf1 <> Cnf.cardinal cnf3 then (memoisation := Memois.add p.cnf !memoisation; None)
         else
         match Cnf.choose_opt cnf3 with
           | None -> Some []
@@ -42,7 +42,7 @@ struct
                               let cnf6 = remove_var_clause cnf3 second_var in
                               let second_cnf = solve {nb_var = new_cnf.nb_var; nb_clause = Cnf.cardinal cnf6; cnf = cnf6} in
                               match second_cnf with
-                                | None -> memoisation := Memois.add cnf6 !memoisation; None
+                                | None -> memoisation := Memois.add p.cnf !memoisation; None
                                 | Some l -> Some (second_var::((l_sgl)@l))
                             )
                             | Some l -> Some (new_var::(l_sgl@l))
