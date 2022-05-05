@@ -1,0 +1,6 @@
+EXCLUDE_QUERY_DIR
+B /home/maena/.opam/default/lib/menhirLib
+B ../_build/default/src/.main.eobjs/byte
+S /home/maena/.opam/default/lib/menhirLib
+S .
+FLG -w -40
