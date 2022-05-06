@@ -3,7 +3,7 @@ open Format
 
 type t = int list
 
-type env = unit
+type env = int list
 let size = 9
 let root = int_of_float (sqrt (float_of_int size))
 
@@ -66,7 +66,7 @@ let cnf_sudoku =
     done;
     for i = 0 to 2 do
       for j = 0 to 2 do
-        l := (clause_carre i j k)::!l
+        l := (clause_carre (i*3) (j*3) k)::!l
       done;
     done;
   done;
@@ -84,20 +84,55 @@ let rec print_list = function
   | [] -> ()
   | h::q -> print_int h; print_string "|"; print_list q
 
+let recup_pos x = 
+  let i = x/81 in
+  let j = (x-i*81)/9 in
+  let k = x mod 9 in
+  if k = 0 then 
+    if j = 0 then (i-1,8,9)
+    else (i,j-1,9)
+  else (i,j,k)
+
+let indice (i,j,k) =
+  i*81+j*9+k
+
+let display_grid t = 
+  for i=0 to 8 do
+    for j=0 to 8 do
+      print_int t.(i*9+j); print_string " "
+    done;
+  print_string "\n";
+  done
+
+
 let to_cnf : t -> env * Ast.t = fun sudoku -> 
-  let rec aux ind l1 l2 = match l1 with
-    | [] -> l2
-    | h::q -> let l = ref l2 in 
+  let rec aux ind l1 s1 = match l1 with
+    | [] -> s1
+    | h::q -> let s = ref s1 in 
+              let i_ind,j_ind,_ = recup_pos (ind*9+1) in
               if h > 0 then
                 ( for k=1 to 9 do
-                  if k = h then l := (ind*9+k)::!l
-                  else l := -(ind*9+k)::!l 
-                done );
-              aux (ind+1) q !l
-  in let l = aux 0 sudoku [] in
+                    if k = h then s := Clause.add (ind*9+k) !s
+                    else s := Clause.add (-(ind*9+k)) !s
+                  done;
+                  for i=0 to 8 do
+                    if i <> i_ind then s := Clause.add (-(indice (i,j_ind,h))) !s;              
+                    if i <> j_ind then s := Clause.add (-(indice (i_ind,i,h))) !s;
+                  done;
+                  let deb_i = (i_ind/3)*3 and deb_j = (j_ind/3)*3 in
+                    for i=0 to 2 do
+                      for j=0 to 2 do
+                        if deb_i+i <> i_ind && deb_j+j <> j_ind then s:= Clause.add (-(indice (deb_i+i,deb_j+j,h))) !s
+                      done;
+                    done;
+                );
+              aux (ind+1) q !s
+  in 
+  let l = Clause.elements (aux 0 sudoku Clause.empty) in
   let cnf = remove_lvar_clause l cnf_sudoku.cnf in
-  (* pp_cnf Format.std_formatter cnf; *)
-  ((),{nb_var = 729 - List.length l; nb_clause = Cnf.cardinal cnf; cnf})
+  print_list l;
+  let total_cnf = {nb_var = 729 - List.length l; nb_clause = Cnf.cardinal cnf; cnf} in
+  Ast.pp Format.std_formatter total_cnf; (l,total_cnf)
 
 let solution_of : env -> Ast.model -> t = fun env model -> 
   let tab = Array.make 81 0 in
@@ -108,7 +143,11 @@ let solution_of : env -> Ast.model -> t = fun env model ->
                           else tab.(case) <- chiffre;
                           aux q
     | _::q -> aux q
-  in aux model; Array.to_list tab
+  in 
+  let l = env@model in
+  aux l;
+  display_grid tab;
+  Array.to_list tab
 
 let grid_of_str : string -> t = fun str ->
   let l = ref [] in
