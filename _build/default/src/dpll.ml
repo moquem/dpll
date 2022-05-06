@@ -22,13 +22,13 @@ struct
     else 
     ( 
       let l_sgl = List.map (fun elt -> Clause.choose elt) (Cnf.elements (Cnf.filter (fun elt -> (Clause.cardinal elt) = 1) p.cnf)) in 
-      print_string "ici ça marche\n";
       if not(verif_unit_prop l_sgl) then (memoisation := Memois.add p.cnf !memoisation; None)
       else 
       (
         let cnf1 = remove_lvar_clause l_sgl p.cnf in
         let seq = recup_unit_var (recup_var cnf1) in
-        let cnf2 = Seq.fold_left (fun c x -> remove_var_clause_unit c x) cnf1 seq in
+        let cnf2 = List.fold_left (fun c x -> remove_var_clause_unit c x) cnf1 seq in
+        let l_sgl = seq@l_sgl in
         let cnf3 = Cnf.filter (fun elt -> not(Clause.is_empty elt)) cnf2 in
         if Cnf.cardinal cnf2 <> Cnf.cardinal cnf3 then None
         else 
@@ -36,7 +36,6 @@ struct
           | None -> Some []
           | Some elt -> let new_var = Clause.choose elt in 
                         begin
-                          print_string "ça marche toujours ?\n";
                           let cnf4 = remove_var_clause cnf2 new_var in
                           let new_cnf = {nb_var = (p.nb_var - (List.length l_sgl)) - 1; nb_clause = Cnf.cardinal cnf4; cnf = cnf4} in
                           match solve new_cnf with
@@ -76,9 +75,8 @@ struct
       Cnf.fold (fun x i -> Clause.union x i) c Clause.empty
   
   and recup_unit_var c =
-      Clause.to_seq (Clause.filter (fun elt -> not(Clause.exists (fun x -> x=(-elt)) c)) c)
+      Clause.elements (Clause.filter (fun elt -> not(Clause.exists (fun x -> x=(-elt)) c)) c)
   
   and memoisation = ref Memois.empty 
-
 end
 

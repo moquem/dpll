@@ -1,1 +1,1 @@
-src/dpll.ml: Ast Clause Cnf List Memois Seq
+src/dpll.ml: Ast Clause Cnf List Memois
