@@ -26,8 +26,8 @@ struct
       else 
       (
         let cnf1 = remove_lvar_clause l_sgl p.cnf in
-        let seq = recup_unit_var (recup_var cnf1) in
-        let cnf2 = List.fold_left (fun c x -> remove_var_clause_unit c x) cnf1 seq in
+        let seq = recup_unit_var (recup_var cnf1) cnf1 in
+        let cnf2 = remove_lvar_clause seq cnf1 in
         let l_sgl = seq@l_sgl in
         let cnf3 = Cnf.filter (fun elt -> not(Clause.is_empty elt)) cnf2 in
         if Cnf.cardinal cnf2 <> Cnf.cardinal cnf3 then None
@@ -74,8 +74,8 @@ struct
   and recup_var c = 
       Cnf.fold (fun x i -> Clause.union x i) c Clause.empty
   
-  and recup_unit_var c =
-      Clause.elements (Clause.filter (fun elt -> not(Clause.exists (fun x -> x=(-elt)) c)) c)
+  and recup_unit_var c1 c2 =
+      Clause.elements (Clause.filter (fun elt -> Cnf.for_all (fun x -> Clause.mem elt x || not(Clause.mem (-elt) x)) c2) c1)
   
   and memoisation = ref Memois.empty 
 end
