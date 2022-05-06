@@ -16,13 +16,13 @@ end
 module DPLL(C:CHOICE) : SOLVER =
 struct
   let rec solve : Ast.t -> Ast.model option = fun p -> 
-    if Memois.mem p.cnf !memoisation then None
-    else 
+    (* if Memois.mem p.cnf !memoisation then None
+    else *)
     if Cnf.is_empty p.cnf then Some []
     else 
     ( 
       let l_sgl = List.map (fun elt -> Clause.choose elt) (Cnf.elements (Cnf.filter (fun elt -> (Clause.cardinal elt) = 1) p.cnf)) in 
-      if not(verif_unit_prop l_sgl) then (memoisation := Memois.add p.cnf !memoisation; None)
+      if not(verif_unit_prop l_sgl) then (* (memoisation := Memois.add p.cnf !memoisation; *) None
       else 
       (
         let cnf1 = remove_lvar_clause l_sgl p.cnf in
@@ -40,12 +40,12 @@ struct
                           let new_cnf = {nb_var = (p.nb_var - (List.length l_sgl)) - 1; nb_clause = Cnf.cardinal cnf4; cnf = cnf4} in
                           match solve new_cnf with
                             | None -> 
-                            ( memoisation := Memois.add cnf4 !memoisation;
+                            ( (* memoisation := Memois.add cnf4 !memoisation; *)
                               let second_var = -new_var in 
                               let cnf6 = remove_var_clause cnf3 second_var in
                               let second_cnf = solve {nb_var = new_cnf.nb_var; nb_clause = Cnf.cardinal cnf6; cnf = cnf6} in
                               match second_cnf with
-                                | None -> memoisation := Memois.add p.cnf !memoisation; None
+                                | None -> (* memoisation := Memois.add p.cnf !memoisation; *) None
                                 | Some l -> Some (second_var::((l_sgl)@l))
                             )
                             | Some l -> Some (new_var::(l_sgl@l))

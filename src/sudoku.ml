@@ -95,9 +95,8 @@ let to_cnf : t -> env * Ast.t = fun sudoku ->
                 done );
               aux (ind+1) q !l
   in let l = aux 0 sudoku [] in
-  print_list l;
   let cnf = remove_lvar_clause l cnf_sudoku.cnf in
-  pp_cnf Format.std_formatter cnf;
+  (* pp_cnf Format.std_formatter cnf; *)
   ((),{nb_var = 729 - List.length l; nb_clause = Cnf.cardinal cnf; cnf})
 
 let solution_of : env -> Ast.model -> t = fun env model -> 
