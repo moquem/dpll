@@ -30,7 +30,7 @@ struct
         let cnf2 = List.fold_left (fun c x -> remove_var_clause_unit c x) cnf1 seq in
         let l_sgl = seq@l_sgl in
         let cnf3 = Cnf.filter (fun elt -> not(Clause.is_empty elt)) cnf2 in
-        if Cnf.cardinal cnf2 <> Cnf.cardinal cnf3 then (memoisation := Memois.add cnf3 !memoisation; None)
+        if Cnf.cardinal cnf2 <> Cnf.cardinal cnf3 then None
         else 
         match Cnf.choose_opt cnf3 with
           | None -> Some []

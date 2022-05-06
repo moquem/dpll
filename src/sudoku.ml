@@ -63,7 +63,9 @@ let cnf_sudoku =
   for k = 1 to 9 do
     for i = 0 to 8 do
       l := (clause_ligne i k)::!l; l:= (clause_colonne i k)::!l;
-      for j = 0 to 8 do
+    done;
+    for i = 0 to 2 do
+      for j = 0 to 2 do
         l := (clause_carre i j k)::!l
       done;
     done;
@@ -78,16 +80,24 @@ let rec remove_lvar_clause l c = match l with
   | h::q -> let c1 = (Cnf.map (Clause.remove (-h)) c) in
             remove_lvar_clause q (Cnf.filter (fun elt -> not(Clause.mem h elt)) c1)
 
+let rec print_list = function
+  | [] -> ()
+  | h::q -> print_int h; print_string "|"; print_list q
+
 let to_cnf : t -> env * Ast.t = fun sudoku -> 
   let rec aux ind l1 l2 = match l1 with
     | [] -> l2
     | h::q -> let l = ref l2 in 
-              for k=1 to 9 do
-                if k = h then l := (ind+k)::!l else l := -(ind+k)::!l
-              done;
+              if h > 0 then
+                ( for k=1 to 9 do
+                  if k = h then l := (ind*9+k)::!l
+                  else l := -(ind*9+k)::!l 
+                done );
               aux (ind+1) q !l
   in let l = aux 0 sudoku [] in
+  print_list l;
   let cnf = remove_lvar_clause l cnf_sudoku.cnf in
+  pp_cnf Format.std_formatter cnf;
   ((),{nb_var = 729 - List.length l; nb_clause = Cnf.cardinal cnf; cnf})
 
 let solution_of : env -> Ast.model -> t = fun env model -> 
