@@ -22,26 +22,28 @@ struct
     else 
     ( 
       let l_sgl = List.map (fun elt -> Clause.choose elt) (Cnf.elements (Cnf.filter (fun elt -> (Clause.cardinal elt) = 1) p.cnf)) in 
+      print_string "ici ça marche\n";
       if not(verif_unit_prop l_sgl) then (memoisation := Memois.add p.cnf !memoisation; None)
       else 
       (
         let cnf1 = remove_lvar_clause l_sgl p.cnf in
-        let cnf3 = Cnf.filter (fun elt -> not(Clause.is_empty elt)) cnf1 in
-        if Cnf.cardinal cnf1 <> Cnf.cardinal cnf3 then (memoisation := Memois.add p.cnf !memoisation; None)
-        else
-        let seq = recup_unit_var (recup_var cnf3) in
-        let cnf5 = Seq.fold_left (fun c x -> remove_var_clause_unit c x) cnf3 seq in
-        match Cnf.choose_opt cnf5 with
+        let seq = recup_unit_var (recup_var cnf1) in
+        let cnf2 = Seq.fold_left (fun c x -> remove_var_clause_unit c x) cnf1 seq in
+        let cnf3 = Cnf.filter (fun elt -> not(Clause.is_empty elt)) cnf2 in
+        if Cnf.cardinal cnf2 <> Cnf.cardinal cnf3 then None
+        else 
+        match Cnf.choose_opt cnf2 with
           | None -> Some []
           | Some elt -> let new_var = Clause.choose elt in 
                         begin
-                          let cnf4 = remove_var_clause cnf5 new_var in
+                          print_string "ça marche toujours ?\n";
+                          let cnf4 = remove_var_clause cnf2 new_var in
                           let new_cnf = {nb_var = (p.nb_var - (List.length l_sgl)) - 1; nb_clause = Cnf.cardinal cnf4; cnf = cnf4} in
                           match solve new_cnf with
                             | None -> 
                             ( memoisation := Memois.add cnf4 !memoisation;
                               let second_var = -new_var in 
-                              let cnf6 = remove_var_clause cnf3 second_var in
+                              let cnf6 = remove_var_clause cnf2 second_var in
                               let second_cnf = solve {nb_var = new_cnf.nb_var; nb_clause = Cnf.cardinal cnf6; cnf = cnf6} in
                               match second_cnf with
                                 | None -> memoisation := Memois.add p.cnf !memoisation; None

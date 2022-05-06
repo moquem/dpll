@@ -28,6 +28,9 @@ struct
         let cnf1 = remove_lvar_clause l_sgl p.cnf in
         let seq = recup_unit_var (recup_var cnf1) in
         let cnf2 = Seq.fold_left (fun c x -> remove_var_clause_unit c x) cnf1 seq in
+        let cnf3 = Cnf.filter (fun elt -> not(Clause.is_empty elt)) cnf2 in
+        if Cnf.cardinal cnf2 <> Cnf.cardinal cnf3 then None
+        else 
         match Cnf.choose_opt cnf2 with
           | None -> Some []
           | Some elt -> let new_var = Clause.choose elt in 
