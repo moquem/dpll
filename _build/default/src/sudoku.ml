@@ -1,6 +1,8 @@
+open Ast
+
 type t = int list
 
-type env (* TO FILL *)
+type env = int list
 let size = 9
 let root = int_of_float (sqrt (float_of_int size))
 
@@ -18,7 +20,28 @@ let pp : 'a printer = fun fmt sudoku ->
     Format.fprintf fmt "@.";
   done
 
+let clause_ligne i k = 
+  let clause = ref Clause.empty in
+  for j=0 to 8 do 
+    clause := Clause.add (i*81 + j*9 + k) !clause 
+  done;
+  !clause
 
+let clause_colonne j k =
+  let clause = ref Clause.empty in
+  for i=0 to 8 do 
+    clause := Clause.add (i*81 + j*9 + k) !clause 
+  done;
+  !clause
+
+let clause_carre i j k =
+  let clause = ref Clause.empty in
+  for ind_i = 0 to 2 do
+    for ind_j = 0 to 2 do
+      clause := Clause.add ((i+ind_i)*81 + (j+ind_j)*9 + k) !clause
+    done
+  done;
+  !clause
 
 let to_cnf : t -> env * Ast.t = fun sudoku -> failwith "todo: to_cnf"
 
