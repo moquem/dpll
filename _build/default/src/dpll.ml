@@ -32,17 +32,17 @@ struct
         let cnf3 = Cnf.filter (fun elt -> not(Clause.is_empty elt)) cnf2 in
         if Cnf.cardinal cnf2 <> Cnf.cardinal cnf3 then None
         else 
-        match Cnf.choose_opt cnf2 with
+        match Cnf.choose_opt cnf3 with
           | None -> Some []
           | Some elt -> let new_var = Clause.choose elt in 
                         begin
-                          let cnf4 = remove_var_clause cnf2 new_var in
+                          let cnf4 = remove_var_clause cnf3 new_var in
                           let new_cnf = {nb_var = (p.nb_var - (List.length l_sgl)) - 1; nb_clause = Cnf.cardinal cnf4; cnf = cnf4} in
                           match solve new_cnf with
                             | None -> 
                             ( memoisation := Memois.add cnf4 !memoisation;
                               let second_var = -new_var in 
-                              let cnf6 = remove_var_clause cnf2 second_var in
+                              let cnf6 = remove_var_clause cnf3 second_var in
                               let second_cnf = solve {nb_var = new_cnf.nb_var; nb_clause = Cnf.cardinal cnf6; cnf = cnf6} in
                               match second_cnf with
                                 | None -> memoisation := Memois.add p.cnf !memoisation; None
