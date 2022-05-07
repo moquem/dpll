@@ -97,6 +97,7 @@ let indice (i,j,k) =
   i*81+j*9+k
 
 let display_grid t = 
+  print_string "\n";
   for i=0 to 8 do
     for j=0 to 8 do
       print_int t.(i*9+j); print_string " "
@@ -130,11 +131,12 @@ let to_cnf : t -> env * Ast.t = fun sudoku ->
   in 
   let l = Clause.elements (aux 0 sudoku Clause.empty) in
   let cnf = remove_lvar_clause l cnf_sudoku.cnf in
-  print_list l;
+  (* print_list l; *)
   let total_cnf = {nb_var = 729 - List.length l; nb_clause = Cnf.cardinal cnf; cnf} in
-  Ast.pp Format.std_formatter total_cnf; (l,total_cnf)
+  (* Ast.pp Format.std_formatter total_cnf; *) (l,total_cnf)
 
 let solution_of : env -> Ast.model -> t = fun env model -> 
+  (* print_list model; *)
   let tab = Array.make 81 0 in
   let rec aux = function
     | [] -> ()
@@ -146,7 +148,7 @@ let solution_of : env -> Ast.model -> t = fun env model ->
   in 
   let l = env@model in
   aux l;
-  display_grid tab;
+  (* display_grid tab; *)
   Array.to_list tab
 
 let grid_of_str : string -> t = fun str ->

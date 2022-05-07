@@ -15,7 +15,9 @@ end
 
 module DPLL(C:CHOICE) : SOLVER =
 struct
-  let rec solve : Ast.t -> Ast.model option = fun p -> 
+let rec solve : Ast.t -> Ast.model option = fun p -> 
+    (* print_string "new_cnf \n"; 
+    Ast.pp Format.std_formatter p; *)
     if Memois.mem p.cnf !memoisation then None
     else 
     if Cnf.is_empty p.cnf then Some []
@@ -34,7 +36,7 @@ struct
         if Cnf.cardinal cnf2 <> Cnf.cardinal cnf3 then None
         else 
         match Cnf.choose_opt cnf3 with
-          | None -> Some []
+          | None -> Some l_sgl
           | Some elt -> let new_var = Clause.choose elt in 
                         begin
                           let cnf4 = remove_var_clause cnf3 new_var in
@@ -80,4 +82,3 @@ struct
   
   and memoisation = ref Memois.empty 
 end
-
