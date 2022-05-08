@@ -1,8 +1,0 @@
-lib: [
-  "_build/install/default/lib/dpll/META"
-  "_build/install/default/lib/dpll/dune-package"
-  "_build/install/default/lib/dpll/opam"
-]
-bin: [
-  "_build/install/default/bin/dpll"
-]
