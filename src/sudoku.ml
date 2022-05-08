@@ -107,6 +107,7 @@ let display_grid t =
 
 
 let to_cnf : t -> env * Ast.t = fun sudoku -> 
+  (* display_grid (Array.of_list sudoku); print_string "\n"; *)
   let rec aux ind l1 s1 = match l1 with
     | [] -> s1
     | h::q -> let s = ref s1 in 

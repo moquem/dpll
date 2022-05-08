@@ -22,45 +22,43 @@ let rec solve : Ast.t -> Ast.model option = fun p ->
     else 
     if Cnf.is_empty p.cnf then Some []
     else 
-    ( 
-      let l_sgl = List.map (fun elt -> Clause.choose elt) (Cnf.elements (Cnf.filter (fun elt -> (Clause.cardinal elt) = 1) p.cnf)) in 
-      if not(verif_unit_prop l_sgl) then (memoisation := Memois.add p.cnf !memoisation; None)
+    ( let l_sgl = ref [] and cnf = ref p.cnf
+      in
+
+      (* Balaie la CNF pour enlever tous les singletons *)
+      while Cnf.exists (fun x -> (Clause.cardinal x) = 1) !cnf do
+      let l = List.map (fun elt -> Clause.choose elt) (Cnf.elements (Cnf.filter (fun elt -> (Clause.cardinal elt) = 1) !cnf)) in 
+      l_sgl := l@(!l_sgl); cnf := remove_lvar_clause l !cnf
+      done;
+
+      let cnf3 = Cnf.filter (fun elt -> not(Clause.is_empty elt)) !cnf in
+
+      (* Vérifie si lors de l'assignation des singletons, il n'y a pas eu de conflits, à savoir assignation impossible.
+      Si c'est le cas, alors on en profite pour stocker cette CNF comme insatisfiable. *)
+      if Cnf.cardinal !cnf <> Cnf.cardinal cnf3 then (memoisation := Memois.add p.cnf !memoisation; None)
+
       else 
-      (
-        let cnf1 = remove_lvar_clause l_sgl p.cnf in
-        (* let seq = recup_unit_var (recup_var cnf1) cnf1 in
-        let cnf2 = remove_lvar_clause seq cnf1 in
-        let l_sgl = seq@l_sgl in *)
-        let cnf2 = cnf1 in
-        let cnf3 = Cnf.filter (fun elt -> not(Clause.is_empty elt)) cnf2 in
-        if Cnf.cardinal cnf2 <> Cnf.cardinal cnf3 then None
-        else 
-        match Cnf.choose_opt cnf3 with
-          | None -> Some l_sgl
-          | Some elt -> let new_var = Clause.choose elt in 
-                        begin
-                          let cnf4 = remove_var_clause cnf3 new_var in
-                          let new_cnf = {nb_var = (p.nb_var - (List.length l_sgl)) - 1; nb_clause = Cnf.cardinal cnf4; cnf = cnf4} in
-                          match solve new_cnf with
-                            | None -> 
-                            ( memoisation := Memois.add cnf4 !memoisation;
-                              let second_var = -new_var in 
-                              let cnf6 = remove_var_clause cnf3 second_var in
-                              let second_cnf = solve {nb_var = new_cnf.nb_var; nb_clause = Cnf.cardinal cnf6; cnf = cnf6} in
-                              match second_cnf with
-                                | None -> memoisation := Memois.add p.cnf !memoisation; None
-                                | Some l -> Some (second_var::((l_sgl)@l))
-                            )
-                            | Some l -> Some (new_var::(l_sgl@l))
-                        end
-      )
+      match Cnf.choose_opt cnf3 with
+        | None -> Some !l_sgl (* La CNF est vide, donc satisfiable *)
+        | Some elt -> let new_var = Clause.choose elt in 
+                      begin
+                        let cnf4 = remove_var_clause cnf3 new_var in
+                        let new_cnf = {nb_var = (p.nb_var - (List.length !l_sgl)) - 1; nb_clause = Cnf.cardinal cnf4; cnf = cnf4} in
+                        match solve new_cnf with
+                          | None -> 
+                          ( memoisation := Memois.add cnf4 !memoisation;
+                            let second_var = -new_var in 
+                            let cnf6 = remove_var_clause cnf3 second_var in
+                            let second_cnf = solve {nb_var = new_cnf.nb_var; nb_clause = Cnf.cardinal cnf6; cnf = cnf6} in
+                            match second_cnf with
+                              | None -> memoisation := Memois.add p.cnf !memoisation; None
+                              | Some l -> Some (second_var::((!l_sgl)@l))
+                          )
+                          | Some l -> Some (new_var::(!l_sgl@l))
+                      end
     )
 
-  
-  and verif_unit_prop = function
-    | [] -> true
-    | h::q when List.mem (-h) q -> false
-    | _::q -> verif_unit_prop q
+
 
   and remove_var_clause c v = 
       let c1 = Cnf.map (Clause.remove (-v)) c in
