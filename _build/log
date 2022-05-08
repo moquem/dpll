@@ -4,7 +4,7 @@
 # Workspace root: "/home/maena/Documents/Etude/ENS Paris-Saclay/L3/S2/Projet
 # logique/Projet 1/solve"
 # Auto-detected concurrency: 4
-$ /usr/bin/ocamlc.opt -config > /tmp/dune_c752f7_output
+$ /usr/bin/ocamlc.opt -config > /tmp/dune_45a40c_output
 # Dune context:
 #  { name = "default"
 #  ; kind = "default"
@@ -110,3 +110,9 @@ $ /usr/bin/ocamlc.opt -config > /tmp/dune_c752f7_output
 #      ; windows_unicode = false
 #      }
 #  }
+$ (cd _build/default && /usr/bin/ocamldep.opt -modules -impl src/dpll.ml) > _build/default/src/.main.eobjs/dpll.ml.d
+$ (cd _build/default && /usr/bin/ocamldep.opt -modules -impl src/sudoku.ml) > _build/default/src/.main.eobjs/sudoku.ml.d
+$ (cd _build/default && /usr/bin/ocamlopt.opt -w -40 -g -I src/.main.eobjs/byte -I src/.main.eobjs/native -I /home/maena/.opam/default/lib/menhirLib -intf-suffix .ml -no-alias-deps -o src/.main.eobjs/native/dpll.cmx -c -impl src/dpll.ml)
+$ (cd _build/default && /usr/bin/ocamlopt.opt -w -40 -g -I src/.main.eobjs/byte -I src/.main.eobjs/native -I /home/maena/.opam/default/lib/menhirLib -intf-suffix .ml -no-alias-deps -o src/.main.eobjs/native/sudoku.cmx -c -impl src/sudoku.ml)
+$ (cd _build/default && /usr/bin/ocamlopt.opt -w -40 -g -I src/.main.eobjs/byte -I src/.main.eobjs/native -I /home/maena/.opam/default/lib/menhirLib -intf-suffix .ml -no-alias-deps -o src/.main.eobjs/native/main.cmx -c -impl src/main.ml)
+$ (cd _build/default && /usr/bin/ocamlopt.opt -w -40 -g -o src/main.exe /home/maena/.opam/default/lib/menhirLib/menhirLib.cmxa src/.main.eobjs/native/ast.cmx src/.main.eobjs/native/location.cmx src/.main.eobjs/native/console.cmx src/.main.eobjs/native/tokensDimacs.cmx src/.main.eobjs/native/lexerDimacs.cmx src/.main.eobjs/native/parserDimacs.cmx src/.main.eobjs/native/dimacs.cmx src/.main.eobjs/native/dpll.cmx src/.main.eobjs/native/sudoku.cmx src/.main.eobjs/native/main.cmx)
