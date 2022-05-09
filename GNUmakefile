@@ -30,6 +30,9 @@ TIMEOUT=30
 SUDOKUSTART=0
 NSUDOKU=10
 
+UNEQUALSTART=0
+NUNEQUAL=10
+
 #################
 #      DPLL     #
 #################
@@ -46,3 +49,11 @@ tests: build dpll
 .PHONY: sudoku
 sudoku: build dpll
 	./sudoku/run.sh $(TIMEOUT) $(SUDOKUSTART) $(NSUDOKU)
+
+################
+#    Unequal   #
+################
+
+.PHONY: unequal
+unequal: build dpll
+	./unequal/run.sh $(TIMEOUT) $(UNEQUALSTART) $(NUNEQUAL)
